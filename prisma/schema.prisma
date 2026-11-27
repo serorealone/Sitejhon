@@ -1,0 +1,84 @@
+// ============================================================
+// EstoquePro — Modelo lógico (Prisma ORM / SQLite)
+// Entidades: Usuario, Categoria, Produto, Movimentacao
+// Os valores de campo "papel" e "tipo" são restritos por
+// constraints CHECK no DDL físico (database/sqlite/01-schema.sql)
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// Usuários do sistema — papel: 'ADMIN' | 'OPERADOR'
+model Usuario {
+  id            Int            @id @default(autoincrement())
+  nome          String
+  email         String         @unique
+  senhaHash     String         @map("senha_hash")
+  papel         String         @default("OPERADOR")
+  ativo         Boolean        @default(true)
+  criadoEm      DateTime       @default(now()) @map("criado_em")
+  atualizadoEm  DateTime       @default(now()) @updatedAt @map("atualizado_em")
+  movimentacoes Movimentacao[]
+
+  @@map("usuarios")
+}
+
+/// Categorias de produtos — nome único (case-insensitive no DDL)
+model Categoria {
+  id           Int       @id @default(autoincrement())
+  nome         String    @unique
+  descricao    String?
+  criadoEm     DateTime  @default(now()) @map("criado_em")
+  atualizadoEm DateTime  @default(now()) @updatedAt @map("atualizado_em")
+  produtos     Produto[]
+
+  @@map("categorias")
+}
+
+/// Produtos — SKU único, quantidade >= 0 e preços >= 0 (CHECK no DDL)
+model Produto {
+  id            Int            @id @default(autoincrement())
+  nome          String
+  descricao     String?
+  sku           String         @unique
+  categoriaId   Int            @map("categoria_id")
+  categoria     Categoria      @relation(fields: [categoriaId], references: [id])
+  quantidade    Int            @default(0)
+  estoqueMinimo Int            @default(0) @map("estoque_minimo")
+  precoCusto    Float          @default(0) @map("preco_custo")
+  precoVenda    Float          @default(0) @map("preco_venda")
+  ativo         Boolean        @default(true)
+  criadoEm      DateTime       @default(now()) @map("criado_em")
+  atualizadoEm  DateTime       @default(now()) @updatedAt @map("atualizado_em")
+  movimentacoes Movimentacao[]
+
+  @@index([categoriaId])
+  @@index([nome])
+  @@map("produtos")
+}
+
+/// Histórico imutável de entradas e saídas — tipo: 'ENTRADA' | 'SAIDA'
+model Movimentacao {
+  id              Int      @id @default(autoincrement())
+  produtoId       Int      @map("produto_id")
+  produto         Produto  @relation(fields: [produtoId], references: [id])
+  tipo            String
+  quantidade      Int
+  motivo          String?
+  observacao      String?
+  saldoResultante Int      @map("saldo_resultante")
+  usuarioId       Int      @map("usuario_id")
+  usuario         Usuario  @relation(fields: [usuarioId], references: [id])
+  criadoEm        DateTime @default(now()) @map("criado_em")
+
+  @@index([produtoId])
+  @@index([tipo])
+  @@index([criadoEm])
+  @@map("movimentacoes")
+}
