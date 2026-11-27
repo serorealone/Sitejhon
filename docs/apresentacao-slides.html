@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EstoquePro — Apresentação Projeto 3 (Banco de Dados Relacional)</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface-2: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #10b981;
+      --accent-soft: rgba(16, 185, 129, 0.14);
+      --warn: #f59e0b;
+      --blue: #38bdf8;
+      --purple: #a78bfa;
+      --border: rgba(148, 163, 184, 0.2);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 32px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.9);
+      font-size: 14px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+    .speaker-pill {
+      padding: 5px 14px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 13px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+    main {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 56px;
+    }
+    .slide {
+      display: none;
+      width: 100%;
+      max-width: 1120px;
+      animation: fadeIn 0.22s ease-out;
+    }
+    .slide.active { display: block; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    h1 { font-size: 46px; line-height: 1.15; margin-bottom: 14px; }
+    h2 { font-size: 32px; margin-bottom: 8px; color: #fff; }
+    .subtitle { font-size: 18px; color: var(--muted); margin-bottom: 26px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 22px;
+    }
+    .card h3 { font-size: 17px; margin-bottom: 10px; color: var(--accent); }
+    .card p, .card li { font-size: 15px; line-height: 1.55; color: #e2e8f0; }
+    ul { padding-left: 18px; }
+    li { margin-bottom: 6px; }
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .b-green { background: var(--accent-soft); color: var(--accent); }
+    .b-blue { background: rgba(56, 189, 248, 0.15); color: var(--blue); }
+    .b-warn { background: rgba(245, 158, 11, 0.15); color: var(--warn); }
+    .b-purple { background: rgba(167, 139, 250, 0.15); color: var(--purple); }
+    pre {
+      background: #0b1120;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-family: Consolas, "Cascadia Code", monospace;
+      font-size: 13.5px;
+      line-height: 1.5;
+      color: #e2e8f0;
+      overflow-x: auto;
+    }
+    .kw { color: #38bdf8; font-weight: 600; }
+    .fn { color: #10b981; }
+    .str { color: #fbbf24; }
+    .der-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 10px;
+    }
+    .entity {
+      background: var(--surface);
+      border: 1.5px solid var(--accent);
+      border-radius: 12px;
+      padding: 14px 16px;
+      flex: 1;
+    }
+    .entity-title {
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--accent);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 6px;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+    .entity div { font-size: 13px; color: #cbd5e1; line-height: 1.55; }
+    .rel {
+      text-align: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--warn);
+      min-width: 72px;
+    }
+    footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 32px;
+      border-top: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.9);
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .controls { display: flex; gap: 10px; align-items: center; }
+    button {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 7px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    button:hover { background: var(--surface-2); }
+    button:disabled { opacity: 0.35; cursor: not-allowed; }
+    .highlight-box {
+      border-left: 4px solid var(--accent);
+      background: var(--accent-soft);
+      padding: 14px 18px;
+      border-radius: 0 10px 10px 0;
+      margin-top: 16px;
+      font-size: 15px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand"><span class="dot"></span> EstoquePro — Projeto 3 (Banco de Dados Relacional)</div>
+    <div id="speaker" class="speaker-pill">Grupo: Guilherme, Antonio, Ruback e Braian</div>
+  </header>
+
+  <main>
+    <!-- SLIDE 1: CAPA -->
+    <section class="slide active" data-speaker="Todos / Abertura (Guilherme)">
+      <span class="badge b-green">Projeto 3 — Sistema de Controle de Estoque</span>
+      <h1>EstoquePro</h1>
+      <p class="subtitle">Sistema Web com Banco de Dados Relacional para controle de produtos, categorias e movimentações.</p>
+      <div class="grid-4">
+        <div class="card">
+          <span class="badge b-green">Parte 1</span>
+          <h3>Guilherme</h3>
+          <p>Problema, Requisitos Funcionais e Modelo Conceitual (DER).</p>
+        </div>
+        <div class="card">
+          <span class="badge b-blue">Parte 2</span>
+          <h3>Antonio</h3>
+          <p>Modelo Lógico, Modelo Físico (SQL) e Restrições.</p>
+        </div>
+        <div class="card">
+          <span class="badge b-warn">Parte 3</span>
+          <h3>Ruback</h3>
+          <p>Demonstração ao vivo: CRUD, Movimentações e Bloqueios.</p>
+        </div>
+        <div class="card">
+          <span class="badge b-purple">Parte 4</span>
+          <h3>Braian</h3>
+          <p>Alertas, Histórico, Consultas SQL e Segurança da API.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 2: PROBLEMA E REQUISITOS (GUILHERME) -->
+    <section class="slide" data-speaker="Parte 1 — Guilherme">
+      <span class="badge b-green">Parte 1 — Guilherme</span>
+      <h2>Enunciado e Requisitos Funcionais</h2>
+      <p class="subtitle">Substituir o controle manual de uma pequena loja por um sistema confiável e integrado.</p>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Requisitos Funcionais (PDF)</h3>
+          <ul>
+            <li>Cadastrar <strong>categorias</strong> e <strong>produtos</strong>;</li>
+            <li>Consultar produtos por <strong>nome</strong> ou <strong>categoria</strong>;</li>
+            <li>Registrar <strong>entradas</strong> e <strong>saídas</strong> de estoque;</li>
+            <li>Atualizar a quantidade disponível automaticamente;</li>
+            <li>Exibir lista de produtos com <strong>estoque baixo</strong>;</li>
+            <li>Consultar o <strong>histórico de movimentações</strong> por produto.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Regras de Negócio Críticas</h3>
+          <ul>
+            <li>Todo produto deve pertencer a uma categoria existente;</li>
+            <li><strong>Bloquear saídas</strong> maiores que o estoque disponível;</li>
+            <li><strong>Bloquear movimentações</strong> com quantidade <code>&lt;= 0</code>;</li>
+            <li>Registrar produto, tipo, quantidade, data e usuário em cada movimentação.</li>
+          </ul>
+          <div class="highlight-box">
+            Modelo normalizado até a <strong>3ª Forma Normal (3FN)</strong>, sem dados repetidos.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 3: MODELO CONCEITUAL / DER (GUILHERME) -->
+    <section class="slide" data-speaker="Parte 1 — Guilherme">
+      <span class="badge b-green">Parte 1 — Guilherme</span>
+      <h2>Modelo Conceitual (DER e Cardinalidades)</h2>
+      <p class="subtitle">4 entidades principais interligadas por relacionamentos 1:N.</p>
+      <div class="der-wrap">
+        <div class="entity">
+          <div class="entity-title">CATEGORIAS</div>
+          <div><strong>PK</strong> id<br>nome (UNIQUE)<br>descricao<br>criado_em</div>
+        </div>
+        <div class="rel">1 : N<br>───►<br>classifica</div>
+        <div class="entity">
+          <div class="entity-title">PRODUTOS</div>
+          <div><strong>PK</strong> id<br><strong>FK</strong> categoria_id<br>nome, sku (UNIQUE)<br>quantidade, estoque_minimo<br>preco_custo, preco_venda</div>
+        </div>
+        <div class="rel">1 : N<br>───►<br>possui</div>
+        <div class="entity">
+          <div class="entity-title">MOVIMENTACOES</div>
+          <div><strong>PK</strong> id<br><strong>FK</strong> produto_id<br><strong>FK</strong> usuario_id<br>tipo, quantidade<br>saldo_resultante, criado_em</div>
+        </div>
+        <div class="rel">N : 1<br>◄───<br>registra</div>
+        <div class="entity">
+          <div class="entity-title">USUARIOS</div>
+          <div><strong>PK</strong> id<br>nome<br>email (UNIQUE)<br>senha_hash<br>papel, ativo</div>
+        </div>
+      </div>
+      <div class="highlight-box">
+        <strong>Normalização:</strong> A categoria não fica duplicada como texto em <em>produtos</em>, e os dados do produto não são duplicados em <em>movimentacoes</em>.
+      </div>
+    </section>
+
+    <!-- SLIDE 4: MODELO LÓGICO E FÍSICO (ANTONIO) -->
+    <section class="slide" data-speaker="Parte 2 — Antonio">
+      <span class="badge b-blue">Parte 2 — Antonio</span>
+      <h2>Modelo Lógico, Físico e Restrições SQL</h2>
+      <p class="subtitle">Integridade garantida diretamente no SGBD (<code>database/sqlite/01-schema.sql</code>).</p>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Chaves e Integridade Referencial</h3>
+          <ul>
+            <li><strong>PK (<code>id</code>):</strong> identificador único e imutável em todas as tabelas;</li>
+            <li><strong>FK (<code>categoria_id</code>, <code>produto_id</code>, <code>usuario_id</code>):</strong> com <code>ON DELETE RESTRICT</code> — impede apagar categoria com produto ou produto com histórico;</li>
+            <li><strong><code>UNIQUE</code>:</strong> <code>usuarios(email)</code>, <code>categorias(nome)</code> e <code>produtos(sku)</code>;</li>
+            <li><strong><code>NOT NULL</code>:</strong> campos obrigatórios protegidos contra nulos.</li>
+          </ul>
+        </div>
+        <div>
+          <pre><span class="kw">CREATE TABLE</span> <span class="fn">"movimentacoes"</span> (
+  <span class="str">"id"</span> <span class="kw">INTEGER PRIMARY KEY AUTOINCREMENT</span>,
+  <span class="str">"produto_id"</span> <span class="kw">INTEGER NOT NULL</span>,
+  <span class="str">"tipo"</span> <span class="kw">TEXT NOT NULL CHECK</span> (<span class="str">"tipo"</span> <span class="kw">IN</span> (<span class="str">'ENTRADA'</span>, <span class="str">'SAIDA'</span>)),
+  <span class="str">"quantidade"</span> <span class="kw">INTEGER NOT NULL CHECK</span> (<span class="str">"quantidade"</span> > 0),
+  <span class="str">"saldo_resultante"</span> <span class="kw">INTEGER NOT NULL CHECK</span> (<span class="str">"saldo_resultante"</span> >= 0),
+  <span class="str">"usuario_id"</span> <span class="kw">INTEGER NOT NULL</span>,
+  <span class="kw">FOREIGN KEY</span> (<span class="str">"produto_id"</span>) <span class="kw">REFERENCES</span> <span class="fn">"produtos"</span>(<span class="str">"id"</span>) <span class="kw">ON DELETE RESTRICT</span>
+);</pre>
+          <div class="highlight-box">
+            <strong>CHECK no físico:</strong> também aplicado em <code>produtos</code> (<code>quantidade &gt;= 0</code>, preços <code>&gt;= 0</code>) e <code>usuarios</code> (<code>papel</code>).
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 5: DEMONSTRAÇÃO AO VIVO (RUBACK) -->
+    <section class="slide" data-speaker="Parte 3 — Ruback">
+      <span class="badge b-warn">Parte 3 — Ruback (Sistema ao Vivo)</span>
+      <h2>Demonstração Prática do Sistema</h2>
+      <p class="subtitle">Roteiro de testes ao vivo em <code>http://localhost:3000</code>.</p>
+      <div class="grid-3">
+        <div class="card">
+          <h3>1. Dashboard e Consultas</h3>
+          <ul>
+            <li>Indicadores reais direto do banco;</li>
+            <li>Buscar produto por <strong>nome</strong> ou <strong>SKU</strong>;</li>
+            <li>Filtrar por <strong>categoria</strong>;</li>
+            <li>Testar bloqueio ao tentar excluir categoria com produtos.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>2. Entradas e Saídas</h3>
+          <ul>
+            <li>Registrar uma <strong>Entrada</strong> e ver o estoque subir;</li>
+            <li>Registrar uma <strong>Saída</strong> e ver o estoque diminuir;</li>
+            <li>Conferir atualização automática do saldo.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>3. Validações do PDF</h3>
+          <ul>
+            <li>Tentar movimentar quantidade <strong>0 ou negativa</strong> → bloqueado;</li>
+            <li>Tentar saída <strong>maior que o estoque</strong> → bloqueado;</li>
+            <li>Provar que o saldo nunca fica negativo.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 6: CONSULTAS SQL E SEGURANÇA (BRAIAN) -->
+    <section class="slide" data-speaker="Parte 4 — Braian">
+      <span class="badge b-purple">Parte 4 — Braian</span>
+      <h2>Alertas, Consultas SQL e Segurança</h2>
+      <p class="subtitle">5+ consultas SQL com <code>JOIN</code>, <code>COUNT</code>, <code>SUM</code>, filtros e proteção contra SQL Injection.</p>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Telas e Consultas (<code>03-consultas.sql</code>)</h3>
+          <ul>
+            <li><strong>Alertas:</strong> produtos com estoque baixo ou zerado;</li>
+            <li><strong>Histórico:</strong> movimentações por produto com <code>JOIN</code> em produtos, categorias e usuários;</li>
+            <li><strong>Consolidado por categoria:</strong> <code>LEFT JOIN</code> + <code>COUNT</code> + <code>SUM</code>;</li>
+            <li><strong>Ranking mais movimentados:</strong> <code>GROUP BY</code> + <code>SUM(CASE ...)</code>.</li>
+          </ul>
+        </div>
+        <div>
+          <pre><span class="kw">SELECT</span> c.nome <span class="kw">AS</span> categoria,
+       <span class="fn">COUNT</span>(p.id) <span class="kw">AS</span> total_produtos,
+       <span class="fn">COALESCE</span>(<span class="fn">SUM</span>(p.quantidade), 0) <span class="kw">AS</span> unidades
+<span class="kw">FROM</span> categorias c
+<span class="kw">LEFT JOIN</span> produtos p <span class="kw">ON</span> p.categoria_id = c.id
+<span class="kw">GROUP BY</span> c.id, c.nome
+<span class="kw">ORDER BY</span> unidades <span class="kw">DESC</span>;</pre>
+          <div class="highlight-box">
+            <strong>Segurança e Atomicidade:</strong> Consultas parametrizadas (<code>?</code>) contra <strong>SQL Injection</strong> e movimentações dentro de transação (<code>$transaction</code>).
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 7: ENCERRAMENTO -->
+    <section class="slide" data-speaker="Encerramento">
+      <span class="badge b-green">Conclusão</span>
+      <h2>Obrigado!</h2>
+      <p class="subtitle">Resumo do que foi entregue conforme o checklist do PDF:</p>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Banco de Dados &amp; Modelagem</h3>
+          <ul>
+            <li>Enunciado, requisitos e DER (1:N);</li>
+            <li>Modelo lógico normalizado (PKs e FKs);</li>
+            <li>Modelo físico SQL com <code>NOT NULL</code>, <code>UNIQUE</code>, <code>FK</code> e <code>CHECK</code>;</li>
+            <li>Script de carga inicial e 5+ consultas SQL.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Aplicação Web Conectada</h3>
+          <ul>
+            <li>Front-end React integrado à API REST;</li>
+            <li>CRUD completo + movimentações atômicas;</li>
+            <li>Alertas de estoque baixo, histórico e relatórios;</li>
+            <li>Consultas parametrizadas contra SQL Injection.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div>Use as setas <strong>←</strong> e <strong>→</strong> do teclado para navegar • <strong>F11</strong> para tela cheia</div>
+    <div class="controls">
+      <button id="prev">← Anterior</button>
+      <span id="counter">1 / 7</span>
+      <button id="next">Próximo →</button>
+    </div>
+  </footer>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const counter = document.getElementById('counter');
+    const speaker = document.getElementById('speaker');
+    const prev = document.getElementById('prev');
+    const next = document.getElementById('next');
+    let idx = 0;
+
+    function render() {
+      slides.forEach((s, i) => s.classList.toggle('active', i === idx));
+      counter.textContent = `${idx + 1} / ${slides.length}`;
+      speaker.textContent = slides[idx].dataset.speaker || '';
+      prev.disabled = idx === 0;
+      next.disabled = idx === slides.length - 1;
+    }
+
+    prev.onclick = () => { if (idx > 0) { idx--; render(); } };
+    next.onclick = () => { if (idx < slides.length - 1) { idx++; render(); } };
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') next.click();
+      if (e.key === 'ArrowLeft') prev.click();
+    });
+    render();
+  </script>
+</body>
+</html>
